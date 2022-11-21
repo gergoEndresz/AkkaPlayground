@@ -34,6 +34,7 @@ class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")
   // Todo: standardize test names
   // Todo: remove unnecessary tests
   // Todo: what is a test latch?
+  // todo: write a test that simulates slow pubsub!
 
   "mapAsync" should {
     "have an additional element inFlight if one has been requested" in {
