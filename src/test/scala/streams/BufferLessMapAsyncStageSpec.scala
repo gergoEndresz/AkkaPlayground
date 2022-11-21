@@ -34,7 +34,7 @@ class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")
   // Todo: standardize test names
   // Todo: remove unnecessary tests
   // Todo: what is a test latch?
-  // todo: write a test that simulates slow pubsub!
+  // todo: write a test that simulates slow pubsub! Monitor pre-mapAsync stage by a testProbe to ensure that no messages are passed, but demand should be greater than 5!
 
   "mapAsync" should {
     "have an additional element inFlight if one has been requested" in {
@@ -63,6 +63,7 @@ class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")
 
       val testSubject = BufferLessMapAsyncStage[Int, Int] {
         i => {
+          Thread.sleep(100)
           promise.success(i)
           Future(i)
         }
@@ -70,7 +71,10 @@ class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")
 
       val testSource = Source(1 to 10)
       val testSink = TestSink.probe[Int]
-      val subscriber = testSource.via(testSubject).toMat(testSink)(Keep.right).run()
+      val subscriber = testSource.map(v => {
+        println(v)
+        v
+      }).via(testSubject).toMat(testSink)(Keep.right).run()
 
       subscriber.request(1).expectNext(1).cancel().expectNoMessage()
     }
