@@ -15,6 +15,13 @@ case class BufferLessMapAsyncStage[In, Out](f: In => Future[Out]) extends GraphS
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) with InHandler with OutHandler {
 
+    // done: why do we need this decider: it is so that the one specified on the Flow element gets used.
+    // done: why do we need this getAsyncCallback: see akka docs at: https://doc.akka.io/docs/akka/current/stream/stream-customize.html#using-asynchronous-side-channels
+    // done: why do we need this invokeFutureCB? See answer to getAsyncCallback
+    // done: how does tryPull work: requests an element on a port unless it has already been closed. Fails if called twice before an element has arrived.
+    // done: how does hasBeenPulled work: indicates whether there is already a pending pull
+    // todo: why did they have isCompleted within the futureCompleted's scope?
+
     private var inFlight = 0
 
     def tryPullSafe: Unit = {
@@ -24,13 +31,6 @@ case class BufferLessMapAsyncStage[In, Out](f: In => Future[Out]) extends GraphS
     def isCompleted: Boolean = isClosed(in) && inFlight == 0
 
     override def toString = s"BufferLessMapAsyncStage(f=$f)"
-
-    // done: why do we need this decider: it is so that the one specified on the Flow element gets used.
-    // done: why do we need this getAsyncCallback: see akka docs at: https://doc.akka.io/docs/akka/current/stream/stream-customize.html#using-asynchronous-side-channels
-    // done: why do we need this invokeFutureCB? See answer to getAsyncCallback
-    // done: how does tryPull work: requests an element on a port unless it has already been closed. Fails if called twice before an element has arrived.
-    // done: how does hasBeenPulled work: indicates whether there is already a pending pull
-    // todo: why did they have isCompleted within the futureCompleted's scope?
 
     val decider =
       inheritedAttributes.mandatoryAttribute[SupervisionStrategy].decider

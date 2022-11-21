@@ -19,7 +19,7 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.control.{NoStackTrace}
 
-class MapAsyncSpec extends TestKit(ActorSystem("TestActorSystem")) with AnyWordSpecLike with should.Matchers with BeforeAndAfterAll with ScalaFutures {
+class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")) with AnyWordSpecLike with should.Matchers with BeforeAndAfterAll with ScalaFutures {
   implicit val executionContext = system.dispatcher
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(20 seconds)
@@ -31,6 +31,8 @@ class MapAsyncSpec extends TestKit(ActorSystem("TestActorSystem")) with AnyWordS
 
   // Todo: This is only to demonstrate the problematic behaviour.
   // Todo: cross check tests with akka.stream.scaladsl.FlowMapAsyncUnorderedSpec
+  // Todo: standardize test names
+  // Todo: remove unnecessary tests
   // Todo: what is a test latch?
 
   "mapAsync" should {
