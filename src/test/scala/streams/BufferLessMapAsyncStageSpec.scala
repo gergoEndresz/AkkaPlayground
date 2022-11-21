@@ -6,7 +6,7 @@ import akka.stream.Supervision.resumingDecider
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.stream.testkit.{TestPublisher, TestSubscriber}
 import akka.stream.testkit.scaladsl.{TestSink}
-import akka.testkit.{TestKit, TestLatch, TestProbe}
+import akka.testkit.{TestKit, TestLatch}
 import org.scalatest.{BeforeAndAfterAll}
 
 import org.scalatest.concurrent.ScalaFutures
@@ -29,7 +29,7 @@ class BufferLessMapAsyncStageSpec extends TestKit(ActorSystem("TestActorSystem")
     TestKit.shutdownActorSystem(system, 5 minutes, verifySystemShutdown = true)
   }
 
-  // Todo: This is only to demonstrate the problematic behaviour.
+  // Todo: First test is only to demonstrate the problematic behaviour.
   // Todo: cross check tests with akka.stream.scaladsl.FlowMapAsyncUnorderedSpec
   // Todo: standardize test names
   // Todo: remove unnecessary tests
