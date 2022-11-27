@@ -60,7 +60,7 @@ class PubSubConcurrencySpec extends TestKit(ActorSystem("BufferLessMapAsyncStage
         override lazy val testId = "test-2"
         private val (switch, testSink) = asyncFlow.via(unwrapOption).via(flatMapStage).scan(0)((a, _) => a + 1).toMat(probe)(Keep.both).run()(materializer)
 
-        testSink.request(10).expectNext(0, 1, 2).expectNoMessage(5 seconds)
+        testSink.request(10).expectNext(0, 1, 2).expectNoMessage(3 seconds)
         Server.queueProvider.expiredAcks shouldBe (0)
 
         switch.shutdown()
@@ -72,13 +72,15 @@ class PubSubConcurrencySpec extends TestKit(ActorSystem("BufferLessMapAsyncStage
 }
 
 abstract class PubSubConcurrencyFixture(implicit val system: ActorSystem) extends LowThroughputPubSubProvider {
+  override val nMessages: Int = 2
+
   val killSwitch = KillSwitches.single[String]
 
   implicit val timeout = Timeout(10 seconds)
   val probe = TestSink[Int]()
 
   val tickValue = "tick"
-  val nSubstreams = 5
+  val nSubstreams = 3
 
   val tick: Source[String, UniqueKillSwitch] = Source.tick(pullInitDelay, pullInterval, tickValue).viaMat(KillSwitches.single[String])(Keep.right)
   val unwrapOption: Flow[Option[Int], Int, NotUsed] = Flow[Option[Int]].mapConcat[Int](perhapsInt => perhapsInt.toList)
@@ -122,7 +124,7 @@ abstract class PubSubConcurrencyFixture(implicit val system: ActorSystem) extend
 trait LowThroughputPubSubProvider {
 
 
-  lazy val nMessages: Int = 2
+  val nMessages: Int
 
   val pullInitDelay = 0 seconds
   val pullInterval = 500 millis
