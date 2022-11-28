@@ -29,8 +29,7 @@ class PubSubConcurrencySpec extends TestKit(ActorSystem("BufferLessMapAsyncStage
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(120, Seconds)), interval = scaled(Span(1, Seconds)))
 
   "BatchOrigin shaped stream" should {
-    "not be blocked by Pub/Sub pull" when {
-
+    "be blocked by Pub/Sub pull" when {
 
       "used with fullySyncFlow" in new PubSubConcurrencyFixture {
         val sys = ActorSystem("Test1")
@@ -53,7 +52,9 @@ class PubSubConcurrencySpec extends TestKit(ActorSystem("BufferLessMapAsyncStage
         switch.shutdown()
         Server.shutdown()
       }
+    }
 
+    "NOT be blocked by Pub/Sub pull" when {
       "used with asyncFlow" in new PubSubConcurrencyFixture {
         implicit val sys = ActorSystem("Test2")
         val materializer = Materializer(sys)
